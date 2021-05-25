@@ -1,0 +1,14 @@
+{
+  "name": "@runn-api-tutorial/toggl",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "George Czabania <george@runn.io>",
+  "license": "MIT",
+  "dependencies": {
+    "got": "11.8.2"
+  }
+}
