@@ -7,12 +7,56 @@ to Runn. If you change the value in Runn it will not be updated in Toggl.
 
 The API gives you a flexible way of importing data.
 
-- Using External IDs in Runn to link people & projects with external services.
+### Using External IDs in Runn to link people & projects with external services.
+
+First you will need to identify each person and project in your Toggl workspace.
+
+One way to do this is to perform a "Data Export", which you can find under
+Settings.
+
+You will need to check both "Projects" and "Team" to get a list of all your
+projects and team members.
+
+![](./img/toggl_export_data.png)
+
+Toggl will email you a Zip archive containing several JSON files.
+
+Inside `team.json` you will find a list of each person in your team. The
+crucial field is the `id`.
+
+```json5
+/* team.json */
+[
+  {
+    "id": 6911244,
+    "email": "zimmy41@yahoo.com",
+    "fullname": "Bob Dylan",
+    /* ... */
+  },
+  /* ... */
+]
+```
+
+Within `projects.json` you will find a list of all your Toggl projects. You can
+identify each project from the `name` field and then copy/paste the `id` field.
+
+```json5
+/* projects.json */
+[
+  {
+    "id": 170106163,
+    "name": "Model Z User Interface",
+    /* ... */
+  },
+  /* ... */
+]
+```
 
 1. From the Person Details page, select "Edit Details".
   ![](./img/edit_person_details.png)
-2. Expand the "External IDs" section
-3. Select "Custom1" and paste
+2. Expand the "External IDs" section, click "Add new reference". Use "Custom1"
+   as the name and paste in the matching ID from Toggl.
+  ![](./img/runn_enter_external_id.png)
 
 ### Simple Syncing Script
 
