@@ -9,7 +9,8 @@ The API gives you a flexible way of importing data.
 
 - Using External IDs in Runn to link people & projects with external services.
 
-1. Edit Person Details
+1. From the Person Details page, select "Edit Details".
+  ![](./img/edit_person_details.png)
 2. Expand the "External IDs" section
 3. Select "Custom1" and paste
 
@@ -45,7 +46,7 @@ To make using these HTTP API's easy, I will be using the `got` library.
 npm install got
 ```
 
-Now we can create a `sync_toggl_with_runn.js` script. Let's start by importing `got` and
+Now we can create an `index.js` file. Let's start by importing `got` and
 defining our API keys.
 
 ```javascript
@@ -106,14 +107,31 @@ const getProjectsFromRunn = async () => {
 
 The response body will look like:
 
-```json
-[{
-  "references": {
-    "Custom1": {
-      "external_id": "8348292"
-    }
-  }
-}, ...]
+```json5
+[
+  {
+    "id": "825hq53m",
+    "name": "Hidden Moon Base",
+    "archived": false,
+    "references": {
+      "Custom1": {
+        "external_id": "170103135"
+      }
+    },
+    "confirmed": true,
+    "client_name": "Amazon",
+    "client_id": "564c1k67",
+    "team_id": "wpos8m9",
+    "budget": "116400.0",
+    "rate_card_id": "09ncxx9j",
+    "pricing_model": "tm",
+    "tags": [
+      "Adwords",
+      "Important"
+    ]
+  },
+  /* ... */
+]
 ```
 
 ### Getting a list of people from Runn
@@ -127,14 +145,69 @@ const getPeopleFromRunn = async () => {
 
 The response body will look like:
 
-```json
-[{
-  "references": {
-    "Custom1": {
-      "external_id": "8348292"
-    }
-  }
-}, ...]
+```json5
+[
+  {
+    "id": "3d1hd5zn",
+    "name": "Eric Clapton",
+    "archived": false,
+    "references": {
+      "Custom1": {
+        "external_id": "6910539"
+      }
+    },
+    "first_name": "Eric",
+    "last_name": "Clapton",
+    "email": "a-team+ericclapton@runn.io",
+    "role_id": "029cn27v",
+    "role": {
+      "id": "029cn27v",
+      "name": "Developer",
+      "archived": false
+    },
+    "team_id": "wpos8m9",
+    "team": {
+      "id": "wpos8m9",
+      "name": "Orange"
+    },
+    "current_contract_id": "ye0cg944",
+    "current_contract": {
+      "id": "ye0cg944",
+      "start_date": "20210426",
+      "end_date": null,
+      "minutes_per_day": 480,
+      "employment_type": "employee",
+      "rostered_days": [
+        480,
+        480,
+        480,
+        480,
+        480
+      ],
+      "cost_per_hour": "70.0",
+      "role_id": "029cn27v",
+      "role": {
+        "id": "029cn27v",
+        "name": "Developer",
+        "archived": false
+      }
+    },
+    "projects": [
+      {
+        "id": "xgwh5ygx",
+        "name": "Internal Dev",
+        "archived": false
+      }
+    ],
+    "tags": [
+      "Frontend",
+      "React",
+      "Indonesia"
+    ],
+    "is_placeholder": false
+  },
+  /* ... */
+]
 ```
 
 ### Looking up a person or project by their external ID
@@ -282,7 +355,7 @@ main()
 ### Running the syncing script
 
 ```shell
-$ node sync_toggl_with_runn.js
+$ node index.js
 ```
 
 ### Next steps

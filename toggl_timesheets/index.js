@@ -73,6 +73,10 @@ const main = async () => {
 
   const projects = await getProjectsFromRunn()
   const people = await getPeopleFromRunn()
+
+  console.log(JSON.stringify(projects, null, 2))
+  console.log(JSON.stringify(people, null, 2))
+
   const report = await getWeeklyReportFromToggl(isoDateString)
 
   for (const item of report.data) {
