@@ -1,28 +1,34 @@
 Using the Runn API to sync Toggl Timesheets 
 ===========================================
 
-Note: That this article only covers how to do "one-way" sync, we are taking the
-total time worked for each person on each project from Toggl and sending that
-to Runn. If you change the value in Runn it will not be updated in Toggl.
+This tutorial will walk you through how to create a script that automatically
+copy data from our Toggl workspace into your Runn timesheets.
 
-The API gives you a flexible way of importing data.
+For syncing timesheets to work, you will need to make sure that for each person
+you want to sync from Toggl they exist in Runn. The same goes for any projects
+that they are working on.
+
+We will be using Runn's external references feature to link people sand
+projects from your Toggle account with people and projects in your Runn
+account.
 
 ### Using External IDs in Runn to link people & projects with external services.
 
-First you will need to identify each person and project in your Toggl workspace.
+You will need to get the Toggl ID of each person and project in your Toggl
+workspace. The project ID can be found in the browser URL when viewing that
+project in Toggl, but getting access to the person ID isn't so easy.
 
-One way to do this is to perform a "Data Export", which you can find under
-Settings.
-
-You will need to check both "Projects" and "Team" to get a list of all your
-projects and team members.
+We recommend performing a "Data Export", which you can find in the Toggl
+Settings.  You should check both the "Projects" and "Team" options, Toggl will
+email you a link to  Zip archive containing your data.
 
 ![](./img/toggl_export_data.png)
 
-Toggl will email you a Zip archive containing several JSON files.
+Inside this Zip archive you should find files called `team.json` and
+`projects.json`.
 
 Inside `team.json` you will find a list of each person in your team. The
-crucial field is the `id`.
+crucial field to note is the `id`. We will be copy/pasting this ID into Runn.
 
 ```json5
 /* team.json */
@@ -33,7 +39,12 @@ crucial field is the `id`.
     "fullname": "Bob Dylan",
     /* ... */
   },
-  /* ... */
+  {
+    "id": 6910539,
+    "email": "mahjongbottle@stayradiated.com",
+    "fullname": "Eric Clapton",
+    /* ... */
+  }
 ]
 ```
 
@@ -44,11 +55,20 @@ identify each project from the `name` field and then copy/paste the `id` field.
 /* projects.json */
 [
   {
+    "id": 170103135,
+    "name": "Hidden Moon Base",
+    /* ... */
+  },
+  {
+    "id": 170101834,
+    "name": "iCar Website",
+    /* ... */
+  },
+  {
     "id": 170106163,
     "name": "Model Z User Interface",
     /* ... */
-  },
-  /* ... */
+  }
 ]
 ```
 
@@ -58,10 +78,12 @@ identify each project from the `name` field and then copy/paste the `id` field.
    as the name and paste in the matching ID from Toggl.
   ![](./img/runn_enter_external_id.png)
 
-### Simple Syncing Script
+### Writing a Script
 
-I'm going to use Javascript with Node.js to build a simple syncing tool, but
-you can use any programming language or framework you want.
+https://app.runn.io/developer
+
+We are going to use Javascript with Node.js to write a short script that sync
+data, however the Runn API 
 
 ### API Keys
 
@@ -76,7 +98,7 @@ You can tell it's your test account API Key because it will start with "TEST_".
 
 You can switch to your production account later.
 
-[screenshot of settings page]
+![](./img/runn_api_token.png)
 
 In Toggl this is under your account detials page.
 
