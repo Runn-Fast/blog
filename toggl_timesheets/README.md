@@ -102,7 +102,7 @@ You can switch to your production account later.
 
 In Toggl this is under your account detials page.
 
-[screenshot of toggl]
+![](./img/toggl_api_token.png)
 
 ### Dependencies
 
