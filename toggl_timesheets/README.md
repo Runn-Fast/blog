@@ -2,13 +2,13 @@ Using the Runn API to sync Toggl Timesheets
 ===========================================
 
 This tutorial will walk you through how to create a script that automatically
-copy data from our Toggl workspace into your Runn timesheets.
+copies data from our Toggl workspace into your Runn timesheets.
 
 For syncing timesheets to work, you will need to make sure that for each person
 you want to sync from Toggl they exist in Runn. The same goes for any projects
 that they are working on.
 
-We will be using Runn's external references feature to link people sand
+We will be using Runn's external references feature to link people and
 projects from your Toggle account with people and projects in your Runn
 account.
 
@@ -20,11 +20,11 @@ project in Toggl, but getting access to the person ID isn't so easy.
 
 We recommend performing a "Data Export", which you can find in the Toggl
 Settings.  You should check both the "Projects" and "Team" options, Toggl will
-email you a link to  Zip archive containing your data.
+email you a link to the Zip archive containing your data.
 
 ![](./img/toggl_export_data.png)
 
-Inside this Zip archive you should find files called `team.json` and
+Inside this Zip archive, you should find files called `team.json` and
 `projects.json`.
 
 Inside `team.json` you will find a list of each person in your team. The
@@ -82,16 +82,16 @@ identify each project from the `name` field and then copy/paste the `id` field.
 
 https://app.runn.io/developer
 
-We are going to use Javascript with Node.js to write a short script that sync
+We are going to use Javascript with Node.js to write a short script that syncs
 data, however the Runn API 
 
 ### API Keys
 
 Before we start you'll need to get your API key for Runn and Toggl.
 
-In Runn you'll find this in the Settings page. Runn has a neat feature called
+In Runn you'll find this on the Settings page. Runn has a neat feature called
 the "Test Account", it gives you a way to experiment with Runn and try making
-changing without affecting data in your "Live Account". I would recommend
+changes without affecting data in your "Live Account". I would recommend
 switching to your "Test Account" and using the API key for that first. 
 
 You can tell it's your test account API Key because it will start with "TEST_".
@@ -100,7 +100,7 @@ You can switch to your production account later.
 
 ![](./img/runn_api_token.png)
 
-In Toggl this is under your account detials page.
+In Toggl this is under your account details page.
 
 ![](./img/toggl_api_token.png)
 
@@ -171,7 +171,7 @@ const getProjectsFromRunn = async () => {
 }
 ```
 
-The response body will look like:
+The response body will look like this:
 
 ```json5
 [
@@ -209,7 +209,7 @@ const getPeopleFromRunn = async () => {
 }
 ```
 
-The response body will look like:
+The response body will look like this:
 
 ```json5
 [
@@ -278,13 +278,13 @@ The response body will look like:
 
 ### Looking up a person or project by their external ID
 
-Let's create a helper function to easily retrieve a person/project by it's
+Let's create a helper function to easily retrieve a person/project by its
 external ID.
 
 In Runn, external IDs are always kept as strings. In Toggl, IDs can also be
 numbers so we will convert the provided ID to a string (if it's not already).
 
-We an then use the `.find` method to loop through each item of the list and
+We can then use the `.find` method to loop through each item of the list and
 return the first one that has a matching ID.
 
 Note that we define a new constant, `RUNN_EXTERNAL_ID_KEY` -- this refers to
@@ -316,8 +316,8 @@ const person = findItemByExternalId(people, externalId)
 The Toggl API has an endpoint for getting a weekly summary of all the projects
 that have been worked on and by whom.
 
-This endpoint can return data for a range of days, but this example we are just
-going to look at the data for the current date.
+This endpoint can return data for a range of days, but in this example, we are
+just going to look at the data for the current date.
 
 This function expects the date to be in the form "YYYY-MM-DD".
 
@@ -369,7 +369,7 @@ const postActualTimeToRunn = async (options) => {
 ### Putting it all together
 
 We need to get the current date in YYYY-MM-DD format, there are some JS
-libraries (such as `luxon`), but we can just use the builtin Date class for
+libraries (such as `luxon`), but we can just use the built-in Date class for
 now.
 
 Toggl tracks time in milliseconds, while Runn uses minutes, so we will need to
