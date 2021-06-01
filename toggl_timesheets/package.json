@@ -4,11 +4,20 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.mjs",
+    "test": "xo"
   },
   "author": "George Czabania <george@runn.io>",
   "license": "MIT",
   "dependencies": {
     "got": "11.8.2"
+  },
+  "devDependencies": {
+    "xo": "0.40.1"
+  },
+  "xo": {
+    "rules": {
+      "camelcase": "off"
+    }
   }
 }
