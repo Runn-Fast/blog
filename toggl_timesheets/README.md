@@ -1,8 +1,8 @@
 # Syncing external timesheet solutions with Runn
  
 Before you can start planning the future, you first need to know where you are…
-and in a budget constrained environment, timesheets are a critical measurement
-of how much time has actually been spent. 
+and in a budget-constrained environment, timesheets are a critical measurement
+of how much time has been spent. 
 
 Knowing this means that Runn can forecast when a project will be completed, how
 much it is going to cost to deliver it and what the total bill will be.
@@ -12,8 +12,8 @@ The forecast calculation has two key ingredients:
 - **Scheduled work:** the hours that have been assigned to people in Runn.
 - **Actual work:** the actual hours that people have recorded in their timesheet.
  
-Runn can still create a forecast even without any Actual work, however it's
-unlikely to be very accurate as Runn assumes that the all the Schedled work
+Runn can still create a forecast even without any Actual work, however, it's
+unlikely to be very accurate as Runn assumes that all the Scheduled work
 went exactly as it was planned - which is very rarely the case.
  
 There are 4 options for integrating Actuals with Runn:
@@ -24,14 +24,14 @@ There are 4 options for integrating Actuals with Runn:
 - You can use Runn’s API to automate the syncing of data from your existing
   time tracking tool.
  
-In this article we will be discussing how to use Runn's API. The key benefits
+In this article, we will be discussing how to use Runn's API. The key benefits
 of this approach are:
  
-1. **No change management**. If everyone in your team is already using a time
-   sheeting tool that works, changing to a new tool is going to be painful.
+1. **No change management**. If everyone in your team is already using a
+   timesheeting tool that works, changing to a new tool is going to be painful.
    By syncing data using our API, you don’t need anyone to change a thing. Code
    is often easier to change than people and processes!
-2. **Faster onboarding & streamlined operations**. Time sheeting tools often
+2. **Faster onboarding & streamlined operations**. Timesheeting tools often
    have heaps of the same data Runn needs, people, projects, clients, actuals.
    Syncing this data means there is no room for data to be disconnected.
 3. **Streamlined migrations**. Even if you plan to fully migrate to Runn’s
@@ -39,7 +39,7 @@ of this approach are:
    you can take your time running both systems in tandem till you are ready to
    decommission the old one. 
 
-Now we understand why this stuff matters, let's get into a real world example,
+Now we understand why this stuff matters, let's get into a real-world example,
 building out an API with [Toggl](https://toggl.com), a popular time tracking
 tool. 
 
@@ -60,7 +60,7 @@ https://app.runn.io/developer.
 The script we are building will only sync the timesheet data. You will need to
 make sure that each person and project in Toggl has been created in Runn.
 
-Next we will need to link the data between Runn and Toggl so we know where to
+Next, we will need to link the data between Runn and Toggl so we know where to
 copy the data to.  We will be using Runn's external references feature to
 create a link between data in your Runn and Toggl accounts.
 
@@ -68,7 +68,7 @@ create a link between data in your Runn and Toggl accounts.
 
 When working with the Runn API we will often need to provide a reference to a
 particular project or person. People and projects have names, but names can
-change or be spelt in slightly different ways. Instead we will be referenceing
+change or be spelt in slightly different ways. Instead, we will be referencing
 objects by their unique ID.
 
 We will be entering the Toggl ID of each person and project into Runn as an
@@ -108,7 +108,7 @@ crucial field to note is the `id`. We will be copy/pasting this ID into Runn.
 Within `projects.json` you will find a list of all your Toggl projects. You can
 identify each project from the `name` field and then copy/paste the `id` field.
 
-Also take note of the `workspace_id` field -- we will need this later to get a
+Also, take note of the `workspace_id` field -- we will need this later to get a
 report of all the time worked from Toggl.
 
 ```json5
@@ -171,12 +171,12 @@ API keys for both Runn and Toggl.
 #### Runn API Key
 
 In Runn you'll find this on the Settings page. Runn has a neat feature called
-the "Test Account", it gives you a way to safely experiment with different
+the "Test Account", which gives you a way to safely experiment with different
 features in Runn.
 
 You can do this by clicking on your profile in the top-right corner, and
 selecting **Switch to test account**. Once there you can **Copy live data** to
-copy data from your live acocunt into your test account.
+copy data from your live account into your test account.
 
 ![](./img/runn_switch_to_test_account.png)
 
@@ -187,7 +187,7 @@ click the **Generate** button. You can tell the API key is for your test
 account because it will start with `TEST_`.
 
 If you want to use this script in production all you need to do is to switch
-the API key from your test account to your live account. You can will know you
+the API key from your test account to your live account. You will know you
 are using a production API key if it starts with `LIVE_`.
 
 ![](./img/runn_api_token.png)
@@ -249,7 +249,7 @@ The Runn API also requires that we pass our API key via the `Authorization`
 header.
 
 The Runn API also responds with data in the JSON format, so we can tell `got`
-to parse the JSON for us. When we get a response we can acess the data directly
+to parse the JSON for us. When we get a response we can access the data directly
 within the `body` field.
 
 ```javascript
@@ -281,7 +281,7 @@ const togglAPI = got.extend({
 
 We will need to get a list of all the projects from Runn.
 
-We can the use the `/v0/projects` endpoint for this.
+We can use the `/v0/projects` endpoint for this.
 
 ![](./img/runn_api_v0_projects.png)
 
@@ -468,10 +468,10 @@ The last API call we need is to update the "Actuals" data in Runn.
 Arguments:
 
 - `date`: which day to update
-- `project_id`: ID of the project
-- `person_id`: ID of the person
-- `role_id`: ID of the role
-- `billable_minutes`: whole number of minutes that was worked on the project
+- `project_id`: the ID of the project
+- `person_id`: the ID of the person
+- `role_id`: the ID of the role
+- `billable_minutes`: the whole number of minutes that were worked on the project
 
 ```javascript
 const postActualTimeToRunn = async (options) => {
@@ -495,8 +495,8 @@ With all these functions defined, we can now compose them together.
 The process will work like this:
 
 1. Fetch report data from Toggl
-2. Fetch list of projects from Runn
-3. Fetch list of people from Runn
+2. Fetch the list of projects from Runn
+3. Fetch the list of people from Runn
 4. Loop through each person in the Toggl report
 5. Match the persons Toggl ID to a Runn person by their external reference
 6. Match the projects Toggl ID to a Runn project by their external reference
@@ -555,7 +555,7 @@ main()
 Now can execute the script.
 
 Note, that it's safe to call the script multiple times, it will update each
-persons timesheets and print the results to the console.
+person's timesheets and print the results to the console.
 
 ```shell
 $ node index.mjs
@@ -572,8 +572,8 @@ the current day should match what's in Toggl.
 
 ## Taking this further
 
-This is quite a basic script, there are many things that could be further
-improved:
+This is quite a basic script, there are plenty of improvements that could be
+made:
 
 - sync data for the past week, instead of just today
 - scheduling this script to run every hour
