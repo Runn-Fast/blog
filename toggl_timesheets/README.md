@@ -1,5 +1,49 @@
-Using the Runn API to sync Toggl Timesheets 
-===========================================
+# Syncing external timesheet solutions with Runn
+ 
+Before you can start planning the future, you first need to know where you are…
+and in a budget constrained environment, timesheets are a critical measurement
+of how much time has actually been spent. 
+
+Knowing this means that Runn can forecast when a project will be completed, how
+much it is going to cost to deliver it and what the total bill will be.
+ 
+The forecast calculation has two key ingredients:
+
+- **Scheduled work:** the hours that have been assigned to people in Runn.
+- **Actual work:** the actual hours that people have recorded in their timesheet.
+ 
+Runn can still create a forecast even without any Actual work, however it's
+unlikely to be very accurate as Runn assumes that the all the Schedled work
+went exactly as it was planned - which is very rarely the case.
+ 
+There are 4 options for integrating Actuals with Runn:
+ 
+- You can enter them directly into Runn using the built-in timesheet tools.
+- You can import them into Runn using our CSV importer.
+- You can use one of our pre-built integrations (WorkflowMax, Clockifly & Harvest).
+- You can use Runn’s API to automate the syncing of data from your existing
+  time tracking tool.
+ 
+In this article we will be discussing how to use Runn's API. The key benefits
+of this approach are:
+ 
+1. **No change management**. If everyone in your team is already using a time
+   sheeting tool that works, changing to a new tool is going to be painful.
+   By syncing data using our API, you don’t need anyone to change a thing. Code
+   is often easier to change than people and processes!
+2. **Faster onboarding & streamlined operations**. Time sheeting tools often
+   have heaps of the same data Runn needs, people, projects, clients, actuals.
+   Syncing this data means there is no room for data to be disconnected.
+3. **Streamlined migrations**. Even if you plan to fully migrate to Runn’s
+   timesheeting solution in the future, by keeping the two solutions in sync,
+   you can take your time running both systems in tandem till you are ready to
+   decommission the old one. 
+
+Now we understand why this stuff matters, let's get into a real world example,
+building out an API with [Toggl](https://toggl.com), a popular time tracking
+tool. 
+
+# Using the Runn API to sync Toggl Timesheets 
 
 This tutorial will walk you through how to create a script that automatically
 copies the hours each team member has worked on a project from your Toggl
@@ -235,6 +279,12 @@ const togglAPI = got.extend({
 
 ### Getting a list of projects from Runn
 
+We will need to get a list of all the projects from Runn.
+
+We can the use the `/v0/projects` endpoint for this.
+
+![](./img/runn_api_v0_projects.png)
+
 ```javascript
 const getProjectsFromRunn = async () => {
   const response = await runnAPI.get('v0/projects');
@@ -267,6 +317,8 @@ The response body will look like this:
 ```
 
 ### Getting a list of people from Runn
+
+![](./img/runn_api_v0_people.png)
 
 ```javascript
 const getPeopleFromRunn = async () => {
@@ -410,6 +462,8 @@ The response body from Toggl will look like:
 ### Updating Actuals in Runn
 
 The last API call we need is to update the "Actuals" data in Runn.
+
+![](./img/runn_api_v0_actuals.png)
 
 Arguments:
 
