@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.mjs",
-    "test": "xo"
+    "tidy": "xo --fix"
   },
   "author": "George Czabania <george@runn.io>",
   "license": "MIT",
@@ -13,7 +13,7 @@
     "got": "11.8.2"
   },
   "devDependencies": {
-    "xo": "0.40.1"
+    "xo": "0.44.0"
   },
   "xo": {
     "rules": {

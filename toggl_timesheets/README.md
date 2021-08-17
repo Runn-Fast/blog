@@ -1,88 +1,86 @@
 # Syncing external timesheet solutions with Runn
- 
-Before you can start planning the future, you first need to know where you are…
-and in a budget-constrained environment, timesheets are a critical measurement
-of how much time has been spent. 
 
-Knowing this means that Runn can forecast when a project will be completed, how
-much it is going to cost to deliver it and what the total bill will be.
+In a budget-constrained environment, timesheets are a critical measurement of
+how much time has been spent. Knowing this means that Runn can forecast when a
+project will be completed, how much it is going to cost to deliver it and what
+the total bill will be.
  
-The forecast calculation has two key ingredients:
+Runn calculates forecasts using two key ingredients:
 
-- **Scheduled work:** the hours that have been assigned to people in Runn.
-- **Actual work:** the actual hours that people have recorded in their timesheet.
+- **Scheduled Work**: the hours that have been assigned to people in Runn.
+- **Actual Work**: the actual hours that people have recorded in their timesheet.
  
-Runn can still create a forecast even without any Actual work, however, it's
-unlikely to be very accurate as Runn assumes that all the Scheduled work
-went exactly as it was planned - which is very rarely the case.
+Runn can still forecast without Actual Work, we do this by assuming that all
+the Scheduled Work was done exactly as planned. However, the forecast will be
+far more accurate when Actual Work hours are available.
  
-There are 4 options for integrating Actuals with Runn:
+There are 4 options for recording your Actual Work hours in Runn:
  
-- You can enter them directly into Runn using the built-in timesheet tools.
-- You can import them into Runn using our CSV importer.
-- You can use one of our pre-built integrations (WorkflowMax, Clockifly & Harvest).
-- You can use Runn’s API to automate the syncing of data from your existing
+- You can enter them directly into Runn [using our built-in timesheet
+    tools](https://help.runn.io/en/articles/3777293-timesheets-and-actuals-tracking).
+- You can import them into Runn [using our CSV
+    importer](https://help.runn.io/en/articles/4577789-importing-time-data-via-csv).
+- You can [use one of our pre-built integrations (WorkflowMax, Clockifly & Harvest)](https://help.runn.io/en/articles/4398475-runn-integrations-overview).
+- You can [use Runn’s API](https://app.runn.io/developer) to automate the syncing of data from your existing
   time tracking tool.
  
 In this article, we will be discussing how to use Runn's API. The key benefits
 of this approach are:
  
-1. **No change management**. If everyone in your team is already using a
-   timesheeting tool that works, changing to a new tool is going to be painful.
-   By syncing data using our API, you don’t need anyone to change a thing. Code
-   is often easier to change than people and processes!
-2. **Faster onboarding & streamlined operations**. Timesheeting tools often
-   have heaps of the same data Runn needs, people, projects, clients, actuals.
-   Syncing this data means there is no room for data to be disconnected.
-3. **Streamlined migrations**. Even if you plan to fully migrate to Runn’s
-   timesheeting solution in the future, by keeping the two solutions in sync,
-   you can take your time running both systems in tandem till you are ready to
-   decommission the old one. 
+1. **No change management**. If your team is already using a timesheeting tool,
+   having to move everyone over to a new tool could be painful. By syncing data
+   using our API, your team can keep using the tools they are used to.
+2. **Streamlined operations**. Timesheeting tools often manage a similar set of
+   data to Runn: such as people, projects, clients, hours worked, etc.
+   Integrating your tools with Runn keeps that data connected and in sync.
+3. **Easier migrations**. Even if you plan to fully migrate to Runn’s
+   timesheeting solution in the future, by keeping the two tools in sync, you
+   can take your time running both in tandem till you are ready to decommission
+   the old one. 
 
-Now we understand why this stuff matters, let's get into a real-world example,
-building out an API with [Toggl](https://toggl.com), a popular time tracking
-tool. 
+Let's get into a real-world example: building a simple API integration using
+[Toggl](https://toggl.com), a popular time tracking tool. 
 
-# Using the Runn API to sync Toggl Timesheets 
+## Using the Runn API to sync timesheet data from Toggl
 
-This tutorial will walk you through how to create a script that automatically
-copies the hours each team member has worked on a project from your Toggl
-workspace into your Runn timesheets.
+### Overview
 
-We are going to be using Node.js to write a short script that automates the
-process of copying data for us.
+This tutorial will walk you through how to create your own Runn API integration
+using Node.js that automatically syncs the timesheet data from your Toggl
+workspace to your Runn timesheets.
 
 For more information about the Runn API, you can find our documentation at
-https://app.runn.io/developer.
+[https://app.runn.io/developer](https://app.runn.io/developer).
 
-## Prerequisites
+### Prerequisites for syncing data with Toggl
 
-The script we are building will only sync the timesheet data. You will need to
-make sure that each person and project in Toggl has been created in Runn.
+The script we are going to build today will only sync the timesheet data. You
+will need to make sure that each person and project in Toggl also exists in
+Runn. Any new people or projects you create in the future will need to be added
+to both systems.
 
-Next, we will need to link the data between Runn and Toggl so we know where to
-copy the data to.  We will be using Runn's external references feature to
-create a link between data in your Runn and Toggl accounts.
+When syncing data with the Runn API we will need to specify which particular
+person or project we want to update. People and projects are usually identified
+by their name, but a name can be changed or spelt in various ways. Instead, we
+will be referencing people and projects by their unique ID, which we can only
+rely on to never change.
+
+We will then manually enter the Toggl ID of each person and project into Runn
+as an external reference.
 
 ### Getting the Toggl IDs
 
-When working with the Runn API we will often need to provide a reference to a
-particular project or person. People and projects have names, but names can
-change or be spelt in slightly different ways. Instead, we will be referencing
-objects by their unique ID.
-
-We will be entering the Toggl ID of each person and project into Runn as an
-"external reference".
-
-One way to get access to these IDs is to perform a Toggl "Data Export". You can
-find this within the Toggl Settings page.  You should check both the "Projects"
-and "Team" options. Toggl will email you a link to the Zip archive containing
-your data.
+One way to get access to your Toggl IDs is to perform a Toggl "Data Export".
+You can find this within the Toggl Settings page.  You should check both the
+"Projects" and "Team" options. Toggl will email you a link to the Zip archive
+containing your data.
 
 ![](./img/toggl_export_data.png)
 
 Inside this Zip archive, you should find files called `team.json` and
 `projects.json`.
+
+**Person ID**
 
 Inside `team.json` you will find a list of each person in your team. The
 crucial field to note is the `id`. We will be copy/pasting this ID into Runn.
@@ -105,11 +103,10 @@ crucial field to note is the `id`. We will be copy/pasting this ID into Runn.
 ]
 ```
 
+**Project ID**
+
 Within `projects.json` you will find a list of all your Toggl projects. You can
 identify each project from the `name` field and then copy/paste the `id` field.
-
-Also, take note of the `workspace_id` field -- we will need this later to get a
-report of all the time worked from Toggl.
 
 ```json5
 /* projects.json */
@@ -134,6 +131,12 @@ report of all the time worked from Toggl.
   }
 ]
 ```
+
+
+**Workspace ID**
+
+Also within the `projects.json` file, take note of the `workspace_id` field --
+we will need this later to get a report of all the time worked from Toggl.
 
 ### Creating External References in Runn
 
@@ -161,6 +164,13 @@ Details**.
 
 ![](./img/runn_edit_project_details.png)
 
+At the bottom of the form will be a link to **Show external references**. If you
+click on the link you will see an option to **Add new reference**.
+
+For the Name, select **Custom1**.
+
+For the External ID, enter the matching ID from `projects.json`.
+
 ![](./img/runn_enter_project_external_id.png)
 
 ### Fetching API Keys
@@ -170,32 +180,41 @@ API keys for both Runn and Toggl.
 
 #### Runn API Key
 
-In Runn you'll find this on the Settings page. Runn has a neat feature called
-the "Test Account", which gives you a way to safely experiment with different
-features in Runn.
+**Use your test account**
 
-You can do this by clicking on your profile in the top-right corner, and
-selecting **Switch to test account**. Once there you can **Copy live data** to
-copy data from your live account into your test account.
+Runn has a neat feature called the "Test Account", which allows you to safely
+experiment on a copy of your Runn account.
+
+You can switch to your test account by clicking on your profile in the
+top-right corner, and selecting **Switch to test account**. Once there you can
+click **Copy live data** to copy all the data from your live account into your
+test account.
 
 ![](./img/runn_switch_to_test_account.png)
 
-From here you visit the **Settings** page and navigate to the **API** tab.
+**Getting your Runn API Key**
+
+Visit the **Settings** page and navigate to the **API** tab.
 
 You should see your **API Token** displayed on the page. If you don't, simply
 click the **Generate** button. You can tell the API key is for your test
 account because it will start with `TEST_`.
 
 If you want to use this script in production all you need to do is to switch
-the API key from your test account to your live account. You will know you
-are using a production API key if it starts with `LIVE_`.
+back to your live Runn account and copy the API key from the settings page. You
+will know you are using a production API key if it starts with `LIVE_`.
 
 ![](./img/runn_api_token.png)
 
 #### Toggl API Key
 
-You will find your Toggl API key at the bottom of the **Profile Settings**
-page.
+Open Toggl and click on your profile in the bottom right corner, then select
+**Profile Settings**.
+
+![](./img/toggle_profile_settings.png)
+
+Scroll to the bottom of the page and look for the section labelled **API
+Token**. Click the `-- Click to Reveal --` button to reveal your API key.
 
 ![](./img/toggl_api_token.png)
 
@@ -204,8 +223,8 @@ page.
 With your external references defined and your API keys in your clipboard, you
 are now ready to start building a script.
 
-We are going to be using Node.js. If you haven't got `node` installed locally,
-you can download it from [https://nodejs.org](https://nodejs.org).
+We are going to be using Node.js. If you haven't already got Node.js installed
+locally, you can download it from [https://nodejs.org](https://nodejs.org).
 
 If you would like to skip straight to the final product, you can check out the
 project at
@@ -226,9 +245,11 @@ pasting in our API keys.
 ```javascript
 import got from 'got';
 
-const RUNN_API_KEY = 'TEST_BcgrVHeHzsb5hsu29zTM';
+// Update the below variables with your own API keys.
 
 const TOGGL_API_KEY = '201383f81b3109c26bf9186f611adb8f';
+
+const RUNN_API_KEY = 'TEST_BcgrVHeHzsb5hsu29zTM';
 ```
 
 ### API Wrappers
@@ -357,7 +378,7 @@ The response body will look like this:
 
 ### Looking up a person or project by their external ID
 
-Let's create a helper function to easily retrieve a person/project by its
+Let's create a helper function to easily retrieve a person or project by its
 external ID.
 
 In Runn, external IDs are always kept as strings. In Toggl, IDs can also be
@@ -500,7 +521,7 @@ The process will work like this:
 4. Loop through each person in the Toggl report
 5. Match the persons Toggl ID to a Runn person by their external reference
 6. Match the projects Toggl ID to a Runn project by their external reference
-8. Update the actuals in Runn for that person/project with the minutes worked
+8. Update the actuals in Runn for that person or project with the minutes worked
 
 Toggl reports time in milliseconds, while Runn only uses whole minutes, so we
 will need to switch units before sending the data to Runn.
