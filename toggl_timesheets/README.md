@@ -567,7 +567,7 @@ main()
 
 ### Running the syncing script
 
-We now can execute the script.
+We can now execute the script.
 
 Note, that it's safe to call the script multiple times, it will update each
 person's timesheets and print the results to the console.
@@ -585,9 +585,10 @@ the current day should match what's in Toggl.
 
 If you run into issues:
 
-- [you can compare your code to the fully assembled version of this
+- [You can compare your code to the fully assembled version of this
 script](https://github.com/Runn-Fast/runn-api-tutorial/tree/main/toggl_timesheets/index.mjs).
-- Feel free to send us any questions you have via the live chat on https://help.runn.io
+- Feel free to send us any questions you have via the live chat on
+  https://help.runn.io
 
 ![](./img/runn_actual_data_inserted.png)
 
