@@ -409,7 +409,7 @@ We can use this function like this:
 
 ```javascript
 const people = await getPeopleFromRunn();
-const person = findItemByExternalId(people, externalId);
+const person = findItemByReference(people, externalId);
 ```
 
 ### Getting a report of the projects worked on today in Toggl
@@ -495,15 +495,9 @@ Arguments:
 - `billable_minutes`: the whole number of minutes that were worked on the project
 
 ```javascript
-const postActualTimeToRunn = async (options) => {
+const postActualTimeToRunn = async (body) => {
   const response = await runnAPI.post('v0/actuals', {
-    json: {
-      date: options.date
-      project_id: options.projectId,
-      person_id: options.personId,
-      role_id: options.roleId,
-      billable_minutes: options.billableMinutes,
-    },
+    json: body
   })
   return response.body
 }
@@ -573,7 +567,7 @@ main()
 
 ### Running the syncing script
 
-Now can execute the script.
+We now can execute the script.
 
 Note, that it's safe to call the script multiple times, it will update each
 person's timesheets and print the results to the console.
@@ -588,6 +582,12 @@ Model Z User Interface: Alan Jackson (Project Manager) @ 281 minutes
 You can confirm that the actuals have been copied across by viewing the Person
 Details page and checking the **Timesheet** section. The **Actual** value for
 the current day should match what's in Toggl.
+
+If you run into issues:
+
+- [you can compare your code to the fully assembled version of this
+script](https://github.com/Runn-Fast/runn-api-tutorial/tree/main/toggl_timesheets/index.mjs).
+- Feel free to send us any questions you have via the live chat on https://help.runn.io
 
 ![](./img/runn_actual_data_inserted.png)
 
