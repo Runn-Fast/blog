@@ -1,171 +1,5 @@
 # Hasura
 
-**What problem are we solving?**
-
-- Performance issues with serving "large" amounts of data from Ruby on Rails
-    graphql API, hitting network timeouts on hasura (30s).
-- Relying on hackier workarounds to improve performance they get in the way of
-    building our app
-
-Why we chose Hasura?
-
-- Compared to alternatives?
-   - postgraphile
-   - ruby on rails
-
-- How we migrated from one GraphQL API to another
-- lessons we learned
-- issues we faced
-- performance benefits
-
-....
-
-- PERFORMANCE has been a key factor.
-- we load a lot of data upfront
-- being able to do a single efficient SQL query for each GraphQL request is key
-- Able to extend hasura with HTTP actions, these allow mutations/queries to
-    call out to a custom server endpoint
-
-CONVENIENCE
-Don't have to maintain our own graphql api server code
-
-COMPUTED FIELDS
-sql functions
-to transform data // sits in between database and client
-doesn't support returning a single row (unless it's a scalar), only an array
-runn returns the "current contract" -- needs to return either an empty array or
-an array of one item
-
-AUTHENTICATION
-with jwt tokens
-managed by ruby on rails
-
-ROLES
------
-
-to restrict data access based on user
-prevent users from accessing data that is not in their account
-need to make sure to setup permissions on each table so that no data can be
-leaked
-
-HOSTING
-on heroku is hard
-writing our own github actions to provision heroku servers
-changing the way we deploy to heroku to make it easier to work with docker
-containers
-
-SUBSCRIPTIONS
-easy to setup, hard to debug
-live queries aren't weren't what we wanted
-had to create an audit log table to sync data update between clients
-
-RELAY
------
-
-bastardised relay setup
-slight performance cost with relay endpoint
-aren't using the relay endpoint, instead we use the graphql endpoint and force
-it to work
-aren't using pagination
-
-Relay: Views are not exposed #5044 
-https://github.com/hasura/graphql-engine/issues/5044
-Still not fixed, means we can't use relay mode
-
-
-...
-
-Started this journey back in October 2020
-
-> The two platforms we are looking at are:
-> - Hasura (https://hasura.io/)
-> - PostGraphile (https://www.graphile.org/postgraphile/) (edited) 
-> - 
-> Using a service like one of these means we don't need to create/maintain our
-> own GraphQL server -- it's done automatically based on our database layout
-
-From day 1 it was clear that Hasura was the fastest option:
-
-Rowan:
-I did a test with three engines, on an account that has 4000 project, 1000
-people, and 57,098 assignments (if my math is right)
-- Ruby: 59s
-- PostGraphile Relay: 4.95s
-- Hasura Relay: 3.15s
-- Hasura Apollo: 1.78s
-- So I think from the serve side of things, we can probably easily support
-- Euronext by changing to a new GraphQL Engine. Although, obviously moving to a
-- new graphQL engine has a bunch of complications behind it.
-
-...
-
-REMOTE SCHEMAS
-We first tried to have Hasura proxy our Ruby API
-But it didn't allow us to mix queries between servers, i.e. a single query
-couldn't resolve data from both the database and the Ruby API.
-
-HASHIDS
-Our Ruby API uses hashids
-We decided to switch to database ids
-Still need to use relay global ids → using a SQL function to generate these
-manually for each table
-
-we take our tables `id` field and we rename it to `db_id` in hasura
-+ we add the computed field `global_id`
-+ in our relay graphql query, we use `global_id` for relay internal caching 
-    and we use `db_id` for app logic
-
-BULK UPDATE
-Using Insert + Update on Conflict
-
-VIEWER
-Creating a SQL function to return the current user 
-
-users → all users on the account
-users_viewer →  currently authenticated user
-
---- 
-
-MIGRATION
-
-a bit complicated with relay
-
-- creating two relay "environments"
-   * one environment for ruby api
-   * another environment for hasura api
-- relay compiler can be configured to include/exclude certain directories
-   * we added the suffix `_hasura` to all directories that we had migrated to
-       hasura 
-   * any graphql queries in those directories would be compiled with the hasura
-       schema
-   * any graphql queries outside of those directories would use the ruby schema
-- allowed us to release hasura in chunks without having to migrate every page
-    over at the same time.
-
-
----
-
-HASURA CLOUD
-
-has utils for debugging performance, but we have noticed performance issues
-running on the cloud (we assume it's because it's not co-located with our
-postgresql database)
-
----
-
-SUPPORT
-
-reasonably good experience
-would like to learn haskell so we can contribute to the code base
-
----
-
-CONCLUSION
-
-Quite happy with hasura
-
-1. Runn, what it does, and your engineering team.
-
 - Why you chose Hasura to replace your then existing Ruby on Rails backend
 - What problems were you trying to solve & how Hasura helped overcome them
 ========================================================================
@@ -270,3 +104,172 @@ generally a joy to use.
 
 Insights from using specific Hasura features that helped you get successful
 ===========================================================================
+
+
+----
+
+Unstructured Notes
+==================
+
+**What problem are we solving?**
+
+- Performance issues with serving "large" amounts of data from Ruby on Rails
+    graphql API, hitting network timeouts on hasura (30s).
+- Relying on hackier workarounds to improve performance they get in the way of
+    building our app
+
+Why we chose Hasura?
+
+- Compared to alternatives?
+   - postgraphile
+   - ruby on rails
+
+- How we migrated from one GraphQL API to another
+- lessons we learned
+- issues we faced
+- performance benefits
+
+....
+
+- PERFORMANCE has been a key factor.
+- we load a lot of data upfront
+- being able to do a single efficient SQL query for each GraphQL request is key
+- Able to extend hasura with HTTP actions, these allow mutations/queries to
+    call out to a custom server endpoint
+
+CONVENIENCE
+Don't have to maintain our own graphql api server code
+
+COMPUTED FIELDS
+sql functions
+to transform data // sits in between database and client
+doesn't support returning a single row (unless it's a scalar), only an array
+runn returns the "current contract" -- needs to return either an empty array or
+an array of one item
+
+AUTHENTICATION
+with jwt tokens
+managed by ruby on rails
+
+ROLES
+-----
+
+to restrict data access based on user
+prevent users from accessing data that is not in their account
+need to make sure to setup permissions on each table so that no data can be
+leaked
+
+HOSTING
+on heroku is hard
+writing our own github actions to provision heroku servers
+changing the way we deploy to heroku to make it easier to work with docker
+containers
+
+SUBSCRIPTIONS
+easy to setup, hard to debug
+live queries aren't weren't what we wanted
+had to create an audit log table to sync data update between clients
+
+RELAY
+-----
+
+bastardised relay setup
+slight performance cost with relay endpoint
+aren't using the relay endpoint, instead we use the graphql endpoint and force
+it to work
+aren't using pagination
+
+Relay: Views are not exposed #5044 
+https://github.com/hasura/graphql-engine/issues/5044
+Still not fixed, means we can't use relay mode
+
+...
+
+Started this journey back in October 2020
+
+> The two platforms we are looking at are:
+> - Hasura (https://hasura.io/)
+> - PostGraphile (https://www.graphile.org/postgraphile/) (edited) 
+> - 
+> Using a service like one of these means we don't need to create/maintain our
+> own GraphQL server -- it's done automatically based on our database layout
+
+From day 1 it was clear that Hasura was the fastest option:
+
+Rowan:
+I did a test with three engines, on an account that has 4000 project, 1000
+people, and 57,098 assignments (if my math is right)
+- Ruby: 59s
+- PostGraphile Relay: 4.95s
+- Hasura Relay: 3.15s
+- Hasura Apollo: 1.78s
+- So I think from the serve side of things, we can probably easily support
+- large accounts by changing to a new GraphQL Engine. Although, obviously
+- moving to a new graphQL engine has a bunch of complications behind it.
+
+...
+
+REMOTE SCHEMAS
+We first tried to have Hasura proxy our Ruby API
+But it didn't allow us to mix queries between servers, i.e. a single query
+couldn't resolve data from both the database and the Ruby API.
+
+HASHIDS
+Our Ruby API uses hashids
+We decided to switch to database ids
+Still need to use relay global ids → using a SQL function to generate these
+manually for each table
+
+we take our tables `id` field and we rename it to `db_id` in hasura
++ we add the computed field `global_id`
++ in our relay graphql query, we use `global_id` for relay internal caching 
+    and we use `db_id` for app logic
+
+BULK UPDATE
+Using Insert + Update on Conflict
+
+VIEWER
+Creating a SQL function to return the current user 
+
+users → all users on the account
+users_viewer →  currently authenticated user
+
+--- 
+
+MIGRATION
+
+a bit complicated with relay
+
+- creating two relay "environments"
+   * one environment for ruby api
+   * another environment for hasura api
+- relay compiler can be configured to include/exclude certain directories
+   * we added the suffix `_hasura` to all directories that we had migrated to
+       hasura 
+   * any graphql queries in those directories would be compiled with the hasura
+       schema
+   * any graphql queries outside of those directories would use the ruby schema
+- allowed us to release hasura in chunks without having to migrate every page
+    over at the same time.
+
+
+---
+
+HASURA CLOUD
+
+- has utils for debugging performance, but we have noticed performance issues
+  running on the cloud (we assume it's because it's not co-located with our
+  postgresql database)
+
+---
+
+SUPPORT
+
+- reasonably good experience
+- would like to learn haskell so we can contribute to the code base
+
+---
+
+CONCLUSION
+
+Quite happy with hasura
