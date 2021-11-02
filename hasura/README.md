@@ -144,6 +144,10 @@ users_viewer →  currently authenticated user
 
 ### 4. Creating the Actions we need
 
+The idea of not having to write our GraphQL server also appealed to us. Hasura
+provides query resolves for each table along with mutations to insert, update
+and delete rows.
+
 Our Rails GraphQL API has several mutations that don't easily map to the
 built-in Hasura mutations.
 
@@ -192,50 +196,35 @@ any tools to inspect what SQL query is generated for live queries, which batch
 multiple similar live queries into a single SQL query.
 
 
+Using Hasura in Production
+--------------------------
 
-
-
-
-The Actual Result
------------------
-
-
-Quite happy with Hasura after the migration.
+We have been very satisified with Hasura and are glad we made the switch. 
 
 Hasura can transform each of our GraphQL queries into a single efficient SQL
 query. We are no longer concerned about request loading times when using the
-GraphQL API.
-
-Our app continues to fetch all the data on page load, but the request completes
-at a much faster time, even for our largest customers.
+GraphQL API. Our app continues to make the same GraphQL requests, but the
+request completes at a much faster time, especially for our largest customers.
 
 We no longer need to build and maintain a server for resolving GraphQL queries
-and mutations.
+and mutations. We are usin Hasura's built-in mutations to insert, update and
+delete values.  For more complicated mutations, we are making good use of
+Hasura Actions to call back to our Ruby on Rails API. 
 
-We are making use of Hasura's mutations when possible, to insert, update and
-delete rows.
+We are planning to migrate to a Node.js server and Hasura should help make this
+easier by allowing us to move each migration individually without having to
+update the client app.
 
-Hasuras roles and permissions model is flexible enough for the Runn permissions
-model, allowing us to configure which table columns a particular user is
-allowed to read/write. For example, some Runn users do not have permission to
-access financial data on the account and we can use Hasura roles to enforce
-that permission.
-
-For more complicated mutations, we are making good use of Hasura Actions to
-call back to our Ruby on Rails API. We are planning to migrate to a Node.js
-server and Hasura should help make this easier by allowing us to move each
-migration individually without having to update the client app.
+Hasuras roles and permissions model is flexible enough that we can implement
+the Runn permissions model, allowing us to configure which table columns a
+particular user is allowed to read/write. For example, some Runn users do not
+have permission to access financial data on the account and we can use Hasura
+roles to enforce that permission.
 
 Hasura Live Queries are being used to implement real-time updates for users on
 the same account using WebSockets.
 
-- PERFORMANCE has been a key factor.
-- we load a lot of data upfront
-- being able to do a single efficient SQL query for each GraphQL request is key
-- Able to extend Hasura with HTTP actions, these allow mutations/queries to
-    call out to a custom server endpoint
-
-### Impact on the team
+**Impact on the team**
 
 There was a learning curve getting the team onboarded with Hasura and
 reconfiguring our deployment process, but we adapted quickly and Hasura is
@@ -247,24 +236,3 @@ generally a joy to use.
   they own.
 - The Hasura Console is very useful for debugging queries, showing which SQL
   query is generated along with an analysis of the SQL execution plan
-
-The idea of not having to write our GraphQL server also appealed to us. Hasura
-provides query resolves for each table along with mutations to insert, update
-and delete rows.
-
-
-The Future
-----------
-
-> Where we plan to go from here
-
-- start using Node.js to handle Action's, shouldn't require any changes to the
-    front-end
-- would like to learn Haskell so we can contribute to the code base
-- compute more values on the server-side, either using SQL functions or Actions
-- fetch only the data we need when the app loads, and pull data as the user
-    navigates around the app
-
-
-- We have looked into Hasura Cloud but are opting to host it ourselves at the
-moment.
