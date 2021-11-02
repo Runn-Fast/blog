@@ -14,31 +14,15 @@ performance issues with load times and making changes was no longer instant.
 
 Improving the performance of a web app is never as easy as fixing one simple
 thing, it typically involves optimizing each part of the system. We did our
-best to increase the performance of the database, server and front-end client, but we knew that major changes were needed to achieve the performance for accounts with hundreds of people.
+best to increase the performance of the database, server and front-end client,
+but we knew that major changes were needed to achieve the performance for
+accounts with hundreds of people.
 
 The slowest part of the system was our GraphQL API, it was just really slow to
 respond to large queries. Our server is powered by Ruby on Rails using the
 `graphql` gem.
 
-> **todo (easy):**
-> - large@example.com:
->   - 200 people
->   - 232 projects
->   - 17,891 assignments
->   - 22,785 actuals
-> - how much data do we load on the planner right now?
->   - large@example.com: 3200kb (253kb compressed)
-> - how much data does the project overview report use
->   - large@example.com: 6700kb (475kb compressed)
-
-> **todo (hard):**
-> - go back to `85ee353` 
-> - get stats on response size/duration for a large account (600 people)
-> - also, find out how many database requests we were making.
-> - craft a SQL query that gets the same data from the database
-> - compare to making the same request with Hasura 
-
-The server  can send XXXkb of data pretty quickly. From our
+The server  can send the data pretty quickly. From our
 investigation, the trouble lies in assembling the data to send. We have XX
 tables in our PostgreSQL database
 
@@ -80,7 +64,6 @@ Simply, they read the schema of your database and expose a GraphQL API ready to
 use. They also use very advanced techniques of transforming each GraphQL query
 into a single SQL query to maximize performance. 
 
-
 We considered rewriting the GraphQL Server in Node.js with Apollo Server, but
 we knew that this would be a lot of work. We would need to make sure our SQL
 queries were as efficient as possible to minimise overhead when resolving large
@@ -96,33 +79,21 @@ query, which is incredible for performance.
 It does require that your database schema is aligned with your API, fortunately
 for us, our database already was.
 
-We did some benchmarking on an extremely large account, with 4000 projects,
-1000 people and nearly 60,000 assignments.
+[PostGraphile](https://www.graphile.org/) is an alternative to Hasura, with
+many similar features. One serious benefit of using Postgraphile was that it
+was written in JavaScript (Hasura is written in Haskell) and would be a lot
+easier for us to contribute to. We decided to go with Hasura because it can
+integrate with our existing Ruby on Rails server, instead of having to
+configure SQL functions for all our custom mutations.
 
-- Ruby: 59s
-- PostGraphile Relay: 4.95s
-- Hasura Relay: 3.15s
-- Hasura Apollo: 1.78s
-
-We had a look at Postgraphile as another option. Hasura had a larger community,
-more features and allowed
-Postgraphile also seemed to require using SQL triggers which were wary of using.
-One serious benefit of using Postgraphile was that it was written in JavaScript
-(Hasura is written in Haskell) and would be a lot easier for us to contribute
-to.
-
-_todo: downsides of using postgraphile_
-
-These benchmarks weren't the most accurate, but they gave us hope that
-switching to a new GraphQL engine would give us the performance improvements we
-were looking for.
-
+We performed some rough benchmarks, and found that Hasura was substantially
+faster than our Rails server and marginally faster than PostGraphile. This
+convinced us that switching to Hasura would resolve performance issues we had
+been struggling with.
 
 The idea of not having to write our GraphQL server also appealed to us. Hasura
 provides query resolves for each table along with mutations to insert, update
 and delete rows.
-
-So we decided to use the Hasura GraphQL API.
 
 
 
@@ -132,9 +103,11 @@ The Migration
 
 How we made the switch to Hasura.
 
-We didn't want to migrate all of Run to Hasura in just a single step. We
-knew the migration would involve making _many, many_ changes, taking months of
-work. All these changes would likely conflict with other features being developed in parallel, which would slow us down further. It also increased the risk of bugs as the entire app would need to be thoroughly tested.
+We didn't want to migrate all of Run to Hasura in just a single step. We knew
+the migration would involve making _many, many_ changes, taking months of work.
+All these changes would likely conflict with other features being developed in
+parallel, which would slow us down further. It also increased the risk of bugs
+as the entire app would need to be thoroughly tested.
 
 Instead, we opted to migrate to Hasura in multiple steps. This allowed us to
 release in smaller chunks, that were easier to test.
