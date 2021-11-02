@@ -9,44 +9,35 @@ to help plan their projects. We strived to make Runn as fast as possible while
 also providing plenty of useful features.
 
 But it didn't take long for large companies to become interested in Runn,
-bringing along hundreds of people and projects to manage. We noticed
-performance issues with load times and making changes was no longer instant.
+bringing along hundreds of people and projects to manage. We started to notice
+performance issues, navigating the app was no longer instant.
 
-Improving the performance of a web app is never as easy as fixing one simple
-thing, it typically involves optimizing each part of the system. We did our
-best to increase the performance of the database, server and front-end client,
-but we knew that major changes were needed to achieve the performance for
-accounts with hundreds of people.
+Improving the performance of a web app is rarely as simple as just fixing one
+thing, it typically involves optimizing every part of the system. We spent many
+hours optimizing our database, server and front-end client, but we felt that
+major changes would be needed to achieve the high performance for these large
+accounts.
 
-The slowest part of the system was our GraphQL API, it was just really slow to
-respond to large queries. Our server is powered by Ruby on Rails using the
-`graphql` gem.
+The bottleneck of the system was our GraphQL API, it was just really slow to
+respond to large queries. Our API server was written in Ruby using Rails and
+reads data from a PostgreSQL database.
 
-The server  can send the data pretty quickly. From our
-investigation, the trouble lies in assembling the data to send. We have XX
-tables in our PostgreSQL database
+A typical account will fetch a few hundred kilobytes of data from the server,
+which isn't that much, but it would take our Rails server several seconds to
+respond. 
 
-This isn't that much data, but it is from all over the database. The way our
-Rails GraphQL server resolved queries meant it would make many requests to the
-database to gather the data it needed, some in parallel, other requests in
-series. It then needs to parse and format this data into the structure
-requested by the client.
+We reasoned that this was because of the way Rails would fetch data. For each
+request, Rails would make many separate queries to the database and then
+need to parse and format this data into the appropritae structure.
 
-Our servers run on Heroku, which has a hard limit of 30 seconds to respond to a
-request. If the server takes longer than that, the connection is cut and the
-request fails. Usually, requests should be completed within a second, but on
-large accounts, we started hitting that timeout limit. This would cause the app
-to fail to load.
-
-We found that if we loaded the data directly from the database, bypassing
-Rails, the data could be fetched in a few milliseconds. This told us that there
-was plenty of room for performance improvements and that Rails was the
+We tried fetch all the data directly from the database, in a single query. The
+data was returned in a fraction of the time! This told us that there was plenty
+of room for performance improvements and that the Rails GraphQL server was the
 bottleneck.
 
-We had already optimized Rails as much as we could, any further improvements
-would require radical changes, but we didn't have any developers with the deep
-knowledge of Ruby on Rails. These performance optimizations often came at the
-cost of making the code base more complex and harder to maintain.
+Our team was lacking an experienced Rails developer. We had done our best to
+optimize Rails performance, but we felt any further improvements would require
+radical changes. We began searching for an alternative solution.
 
 Our Proposed Solution
 ---------------------
@@ -133,7 +124,7 @@ it's just sitting there idle, no requests are being made to it just yet.
 
 ### 2. Configuring Relay to support two GraphQL APIs
 
-We are using Relay in the front end app. Like most GraphQL clients, it assumes
+We are using Relay in the front-end app. Like most GraphQL clients, it assumes
 you have a single GraphQL API that you plan to query.
 
 During the migration, our app would be querying from two different APIs.  Relay
@@ -149,7 +140,7 @@ checking.
 
 ### 3. Customising Hasura to fit our needs
 
-We are using Relay on the front end. Hasura provides a special endpoint,
+We are using Relay on the front-end. Hasura provides a special endpoint,
 specifically for Relay, but it doesn't currently support Actions, so we are
 using the standard GraphQL endpoint instead.
 
@@ -170,7 +161,7 @@ For example, we have a mutation to bulk update a list of assignments. It
 handles merging assignments, deleting assignments, creating new
 assignments.
 
-It would be possible to update our front end to call multiple GraphQL
+It would be possible to update our front-end to call multiple GraphQL
 mutations, but this would be complicated and require multiple round trips as we
 wait for the Hasura t
 
@@ -281,7 +272,7 @@ The Future
 > Where we plan to go from here
 
 - start using Node.js to handle Action's, shouldn't require any changes to the
-    front end
+    front-end
 - would like to learn Haskell so we can contribute to the code base
 - compute more values on the server-side, either using SQL functions or Actions
 - fetch only the data we need when the app loads, and pull data as the user
