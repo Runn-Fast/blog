@@ -15,7 +15,7 @@ performance issues, navigating the app was no longer instant.
 Improving the performance of a web app is rarely as simple as just fixing one
 thing, it typically involves optimizing every part of the system. We spent many
 hours optimizing our database, server and front-end client, but we felt that
-major changes would be needed to achieve the high performance for these large
+major changes would be needed to achieve high performance for these large
 accounts.
 
 The bottleneck of the system was our GraphQL API, it was just really slow to
@@ -28,9 +28,9 @@ respond.
 
 We reasoned that this was because of the way Rails would fetch data. For each
 request, Rails would make many separate queries to the database and then
-need to parse and format this data into the appropritae structure.
+need to parse and format this data into the appropriate structure.
 
-We tried fetch all the data directly from the database, in a single query. The
+We tried to fetch all the data directly from the database in a single query. The
 data was returned in a fraction of the time! This told us that there was plenty
 of room for performance improvements and that the Rails GraphQL server was the
 bottleneck.
@@ -42,18 +42,7 @@ radical changes. We began searching for an alternative solution.
 Our Proposed Solution
 ---------------------
 
-> Why we chose Hasura and how we planned to use it
-
-It was October 2020 and we were looking for a performant GraphQL server.
-
-We started looking at alternative solutions, specifically looking for fast and
-efficient GraphQL servers. 
-
-We found Hasura and Postgraphile, which are both quite similar.
-
-Simply, they read the schema of your database and expose a GraphQL API ready to
-use. They also use very advanced techniques of transforming each GraphQL query
-into a single SQL query to maximize performance. 
+We were specifically looking for a fast and efficient GraphQL server. 
 
 We considered rewriting the GraphQL Server in Node.js with Apollo Server, but
 we knew that this would be a lot of work. We would need to make sure our SQL
@@ -61,33 +50,34 @@ queries were as efficient as possible to minimise overhead when resolving large
 queries, as well as handling exceptions and making sure the whole thing was
 secure.
 
-Hasura, an open-source GraphQL engine.
+We soon discovered [Hasura](https://hasura.io/), which is an open-source
+GraphQL engine. It automatically generates a ready-to-use GraphQL API based on
+the schema of your database and uses advanced techniques to resolve queries as
+quickly as possible. It does require that your database schema is aligned
+closely with your API. Fortunately, our database already was.
 
-From our initial testing, it was clear that Hasura was the fastest option.
-Behind the scenes, it would convert each GraphQL request into just a single SQL
-query, which is incredible for performance.
+From our initial testing, it was clear that Hasura was extremely fast. Behind
+the scenes, it would convert each GraphQL request into just a single SQL query,
+minimising overhead and getting that raw database performance we knew was
+there.
 
-It does require that your database schema is aligned with your API, fortunately
-for us, our database already was.
+[PostGraphile](https://www.graphile.org/) is a popular alternative to Hasura,
+with many similar features. One serious benefit of using Postgraphile was that
+it was written in JavaScript (Hasura is written in Haskell) and would be a lot
+easier for us to contribute to.  PostGraphile makes good use of native
+PostgreSQL functions, while Hasura encourages the use of webhooks to implement
+custom mutations. 
 
-[PostGraphile](https://www.graphile.org/) is an alternative to Hasura, with
-many similar features. One serious benefit of using Postgraphile was that it
-was written in JavaScript (Hasura is written in Haskell) and would be a lot
-easier for us to contribute to. We decided to go with Hasura because it can
-integrate with our existing Ruby on Rails server, instead of having to
-configure SQL functions for all our custom mutations.
+We performed a few benchmark tests, which showed that Hasura was extremely
+fast, making our Rails server look sluggish in comparison. We also
+found that Hasura had a slight performance edge over PostGraphile. 
 
-We performed some rough benchmarks, and found that Hasura was substantially
-faster than our Rails server and marginally faster than PostGraphile. This
-convinced us that switching to Hasura would resolve performance issues we had
-been struggling with.
+Hasura's support for webhooks would also allow us to integrate it with our
+existing Ruby on Rails server and reuse the business logic for custom mutations
+(where performance isn't as much of a concern).
 
-The idea of not having to write our GraphQL server also appealed to us. Hasura
-provides query resolves for each table along with mutations to insert, update
-and delete rows.
-
-
-
+We were convinced that switching to Hasura was a sensible choice and would
+bring big performance improvements to the app.
 
 The Migration
 -------------
@@ -140,7 +130,7 @@ checking.
 
 ### 3. Customising Hasura to fit our needs
 
-We are using Relay on the front-end. Hasura provides a special endpoint,
+We are using Relay in the front-end client. Hasura provides a special endpoint,
 specifically for Relay, but it doesn't currently support Actions, so we are
 using the standard GraphQL endpoint instead.
 
@@ -209,13 +199,6 @@ multiple similar live queries into a single SQL query.
 The Actual Result
 -----------------
 
-Feb 2021: upgrade production deploy scripts to get Hasura v1.3 configured
-Mar 2021: initial release on production app start querying Hasura
-MarOur initial released to production in March 2021 with Hasura v1.3
-May 2021 we had all the pages migrated
-June 2021: Migrate Planner to Hasura API
-July 2021: Upgrade to Hasura v2
-In July 2021 we completely removed the original Rails Relay store 
 
 Quite happy with Hasura after the migration.
 
@@ -264,6 +247,10 @@ generally a joy to use.
   they own.
 - The Hasura Console is very useful for debugging queries, showing which SQL
   query is generated along with an analysis of the SQL execution plan
+
+The idea of not having to write our GraphQL server also appealed to us. Hasura
+provides query resolves for each table along with mutations to insert, update
+and delete rows.
 
 
 The Future
