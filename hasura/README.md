@@ -1,6 +1,18 @@
 Migrating Runn to the Hasura GraphQL Engine
 ===========================================
 
+What's Runn?
+-----------
+Runn.io allows organisings to manage dozens or hundreds of projects and people
+effiecently and effectively. We do this by providing real-time data on every
+project and person in the organisation in a easy to understand drag-and-drop
+interface with a lot of visual feedback.
+
+We are frontend heavy to allow real-time charts and calculations as each projects
+is scheduled and people are assigned work. This means we load the vast majority
+of our data upfront and then all calculations are done on the frontend with
+optomised updates, and real-time updates to all others logged into an account.
+
 The Problem
 -----------
 
@@ -35,9 +47,9 @@ data was returned in a fraction of the time! This told us that there was plenty
 of room for performance improvements and that the Rails GraphQL server was the
 bottleneck.
 
-Our team was lacking an experienced Rails developer. We had done our best to
-optimize Rails performance, but we felt any further improvements would require
-radical changes. We began searching for an alternative solution.
+We had done our best to optimize Rails performance having increased performance by
+more than 100x since the original implementation, but we felt any further improvements
+would require radical changes. We began searching for an alternative solution.
 
 Our Proposed Solution
 ---------------------
@@ -70,7 +82,7 @@ custom mutations.
 
 We performed a few benchmark tests, which showed that Hasura was extremely
 fast, making our Rails server look sluggish in comparison. We also
-found that Hasura had a slight performance edge over PostGraphile. 
+found that Hasura had performance edge over PostGraphile in our for our user case. 
 
 Hasura's support for webhooks would also allow us to integrate it with our
 existing Ruby on Rails server and reuse the business logic for custom mutations
@@ -134,6 +146,8 @@ We are using Relay in the front-end client. Hasura provides a special endpoint,
 specifically for Relay, but it doesn't currently support Actions, so we are
 using the standard GraphQL endpoint instead.
 
+<Should we add here something about our use of global_ids and forked relay?>
+
 Making good use of Computed Fields.
 
 - get the current user
@@ -152,12 +166,11 @@ Our Rails GraphQL API has several mutations that don't easily map to the
 built-in Hasura mutations.
 
 For example, we have a mutation to bulk update a list of assignments. It
-handles merging assignments, deleting assignments, creating new
-assignments.
+handles merging, editing, deleting and creating assignments in a single request.
 
 It would be possible to update our front-end to call multiple GraphQL
 mutations, but this would be complicated and require multiple round trips as we
-wait for the Hasura t
+wait for the Hasura to finish each request.
 
 ### 5. Migrating a page at a time
 
@@ -165,6 +178,7 @@ updating queries, mutations
 
 During the migration, We effectively had two Relay stores, each with a cache
 running in parallel.
+
 Sometimes we would need to mutate data that is in both stores and that required
 manually updating the cache.
 
@@ -236,3 +250,17 @@ generally a joy to use.
   they own.
 - The Hasura Console is very useful for debugging queries, showing which SQL
   query is generated along with an analysis of the SQL execution plan
+  
+**What's next**
+
+We are keen to see where Hasura goes next. We've started looking into using the 
+new REST API feature from hasura, to replace our current rails API.
+
+We've also been watching as Hasura Cloud evoles, it doesn't quite give us everything
+we need right now with our highly custom implementation but we're looking forward to 
+potentionally moving on Hasura Cloud as it continues to add features.
+
+Finally, we are interested to see how we can better implement searching in hasura,
+right now our biggest customers are managing hundreds to thousands of projects.
+However our next scale will be tens of thousands of projects, how we can implement
+searching on this scale in Hasura is going to be an exciting challenge for us.
